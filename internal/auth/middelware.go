@@ -14,6 +14,3 @@ func CheckAuthenticated(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-// Require role middleware creator
-// func RequireRole(role string) func(http.Handler) http.Handler {

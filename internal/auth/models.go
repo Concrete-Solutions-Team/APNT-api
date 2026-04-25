@@ -13,7 +13,6 @@ const (
 	RoleTeacher UserRole = "teacher"
 )
 
-// Passwords are not hashed intentionally
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`
