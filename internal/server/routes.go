@@ -10,7 +10,7 @@ import (
 
 func (s *Server) MountEndpoints() {
 	s.router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://smartest-ui.vercel.app/"},
+	    AllowedOrigins: []string{"http://localhost:3000", "https://smartest-ui.vercel.app"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
