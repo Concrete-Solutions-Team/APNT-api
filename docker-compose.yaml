@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15.3-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d db"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+
+  server:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://user:pass@db:5432/db?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
