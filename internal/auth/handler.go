@@ -42,6 +42,8 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Expires:  expiresAt,
 		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 	})
 
@@ -75,6 +77,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Expires:  expiresAt,
 		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 	})
 
