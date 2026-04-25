@@ -1,0 +1,1 @@
+ALTER TABLE submissions ADD COLUMN total INT DEFAULT 0;

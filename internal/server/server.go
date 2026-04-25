@@ -13,18 +13,21 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/slupx/smartest-backend/internal/auth"
+	"github.com/slupx/smartest-backend/internal/test"
 )
 
 type Server struct {
 	router      *chi.Mux
 	httpServer  *http.Server
 	authHandler *auth.Handler
+	testHandler *test.Handler
 }
 
-func NewServer(port string, authHandler *auth.Handler) *Server {
+func NewServer(port string, authHandler *auth.Handler, testHandler *test.Handler) *Server {
 	s := &Server{
 		router:      chi.NewRouter(),
 		authHandler: authHandler,
+		testHandler: testHandler,
 	}
 
 	s.router.Use(middleware.Logger)

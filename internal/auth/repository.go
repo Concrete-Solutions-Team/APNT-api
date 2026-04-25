@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -21,7 +22,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 func (r *Repository) CreateUser(ctx context.Context, u *User) error {
 	sql := `INSERT INTO users (username, password, role) VALUES ($1, $2, $3);`
 
-	_, err := r.db.Exec(ctx, sql, u.Username, u.Password, u.Role)
+	hui, err := r.db.Exec(ctx, sql, u.Username, u.Password, u.Role)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -29,6 +30,7 @@ func (r *Repository) CreateUser(ctx context.Context, u *User) error {
 		}
 		return err
 	}
+	log.Printf("User %s created successfully", hui)
 	return nil
 }
 

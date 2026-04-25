@@ -35,6 +35,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	token, expiresAt, err := h.service.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
@@ -43,7 +44,13 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Path:     "/",
 	})
-	w.WriteHeader(http.StatusCreated)
+
+	response := map[string]string{
+		"username": req.Username,
+		"token":    token,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +68,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	token, expiresAt, err := h.service.Login(r.Context(), req.Username, req.Password)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
@@ -69,7 +77,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Path:     "/",
 	})
-	w.WriteHeader(http.StatusOK)
+
+	response := map[string]string{
+		"username": req.Username,
+		"token":    token,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +98,12 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 		Path:   "/",
 	})
-	w.WriteHeader(http.StatusNoContent)
+
+	response := map[string]string{
+		"message": "logged out",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func (h *Handler) Identify(next http.Handler) http.Handler {
@@ -105,6 +124,28 @@ func (h *Handler) Identify(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), "user", user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func UserFromContext(ctx context.Context) (*User, bool) {
+	user, ok := ctx.Value("user").(*User)
+	return user, ok
+}
+
+func (h *Handler) RequireRole(requiredRole UserRole) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			user, ok := UserFromContext(r.Context())
+			if !ok {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			if user.Role != requiredRole {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {

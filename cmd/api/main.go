@@ -7,6 +7,7 @@ import (
 	"github.com/slupx/smartest-backend/internal/config"
 	"github.com/slupx/smartest-backend/internal/database"
 	"github.com/slupx/smartest-backend/internal/server"
+	"github.com/slupx/smartest-backend/internal/test"
 )
 
 func main() {
@@ -18,9 +19,13 @@ func main() {
 	authService := auth.NewService(authRepo)
 	authHandler := auth.NewHandler(authService)
 
+	testRepo := test.NewRepository(db)
+	testService := test.NewService(testRepo)
+	testHandler := test.NewHandler(testService)
+
 	// scan := scanner.NewScanner(ghCachedClient, notifier, subRepo, 10*time.Second)
 
-	svr := server.NewServer(cfg.Port, authHandler)
+	svr := server.NewServer(cfg.Port, authHandler, testHandler)
 	svr.MountEndpoints()
 
 	if err := svr.Start(); err != nil {
